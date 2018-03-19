@@ -35,7 +35,36 @@ public class Tool : MonoBehaviour {
         //slerp goes here
 
     }
-    
+    void OnMouseOver()
+    {
+        if (LabManager.LM != null)
+        {
+            LabManager.LM.m_HoverText.text = this.m_ToolName;
+            if (this.m_ToolType == ToolType.TestingTube && this.chimicalContent != "")
+            {
+
+            }
+        }
+    }
+    public string fn_ContentShower()
+    {
+        Tool[] LabTools = GameObject.FindObjectsOfType<Tool>();
+        foreach (Tool item in LabTools)
+        {
+            if (this.chimicalContent == item.m_ToolType.ToString())
+            {
+                LabManager.LM.m_HoverText.text = item.m_ToolName;
+            }
+        }
+        return "";
+    }
+    void OnMouseExit()
+    {
+        if (LabManager.LM != null)
+        {
+            LabManager.LM.m_HoverText.text = "";
+        }
+    }
     private void OnMouseUp()
     {
         if (LabManager.LM != null)
@@ -95,17 +124,6 @@ public class Tool : MonoBehaviour {
                 }
             }
         }
-    }
-    void OnMouseOver()
-    {
-        //If your mouse hovers over the GameObject with the script attached, output this message
-        Debug.Log("Mouse is over GameObject.");
-    }
-
-    void OnMouseExit()
-    {
-        //The mouse is no longer hovering over the GameObject so output this message each frame
-        Debug.Log("Mouse is no longer on GameObject.");
     }
 
     private void Smash(string SmashableObjectTag)
