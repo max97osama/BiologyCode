@@ -7,6 +7,9 @@ public class Tool : MonoBehaviour {
     //private:
     public Vector3 originalPosition;
     private Vector3 originalTestingTubePosition;
+    private bool isMoving;
+    private float startTime;
+    private Vector3 Direction;
     public bool isFull = false;
     public string chimicalContent;
     //public:
@@ -18,7 +21,7 @@ public class Tool : MonoBehaviour {
     public Transform m_InteractEntryPoint;
 
     public GameObject[] m_ChildTools;
-    public float m_BunsenBurner_Timer = 10;
+    public float m_BunsenBurner_Timer = 4;
 
     [HideInInspector]
     public bool isPrepared = false;
@@ -33,31 +36,29 @@ public class Tool : MonoBehaviour {
     void Update ()
     {
         //slerp goes here
-
+        if (isMoving)
+        {
+            float fracComplete = (Time.time - startTime) / 2.0f;
+            this.transform.position = Vector3.Slerp(this.transform.position,Direction,fracComplete);
+        }
+        if (this.transform.position == Direction)
+        {
+            isMoving = false;
+        }
     }
     void OnMouseOver()
     {
         if (LabManager.LM != null)
         {
+            LabManager.LM.m_HoverText.color = Color.yellow;
             LabManager.LM.m_HoverText.text = this.m_ToolName;
             if (this.m_ToolType == ToolType.TestingTube && this.chimicalContent != "")
             {
-
+                LabManager.LM.m_HoverText.text = LabManager.LM.fn_TextShower(this.gameObject);
             }
         }
     }
-    public string fn_ContentShower()
-    {
-        Tool[] LabTools = GameObject.FindObjectsOfType<Tool>();
-        foreach (Tool item in LabTools)
-        {
-            if (this.chimicalContent == item.m_ToolType.ToString())
-            {
-                LabManager.LM.m_HoverText.text = item.m_ToolName;
-            }
-        }
-        return "";
-    }
+    
     void OnMouseExit()
     {
         if (LabManager.LM != null)
@@ -84,8 +85,19 @@ public class Tool : MonoBehaviour {
                 {
                     thisMission.isDone = true;
                     LabManager.LM.fn_UpdateMissionText(ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex + 1);
-                    ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex++;
-                    LabManager.LM.m_ToolText.text = "ﺔﺤﻴﺤﺻ ﺓﻮﻄﺧ";
+                    if (ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].m_Missions.Length > ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex)
+                    {
+                        ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex++;
+                        LabManager.LM.m_ToolText.text = "ﺔﺤﻴﺤﺻ ﺓﻮﻄﺧ";
+                    }
+                    else
+                    {
+                        LabManager.LM.m_ToolText.text = "ﺡﺎﺠﻨﺑ ﺔﺑﺮﺠﺘﻟﺍ ﺖﻤﻤﺗﺍ ﺪﻘﻟ";
+                        GameObject.Find("Bunsen Burner").GetComponent<Tool>().m_Content.SetActive(false);
+                        GameObject.Find("Beaker").GetComponent<Tool>().m_Content.SetActive(false);
+                    }
+                    
+                    
                     switch (currentSelectedTool.m_ToolType)
                     {
                         case ToolType.Dropper: currentSelectedTool.fn_Dropper(LabManager.LM.m_LabState, this);
@@ -160,14 +172,38 @@ public class Tool : MonoBehaviour {
     public void fn_ClearContent()
     {
         //GameObject.Destroy(m_Content.gameObject);
-        m_Content = null;
+        this.chimicalContent = "";
         isFull = false;
     }
 
-    public IEnumerator fn_Bunsen_Burner(LabState LS)
+    public IEnumerator ComeBack ()
     {
-        // if (LS == LabState.UsingItem)
-        //{
+        yield return new WaitForSeconds(6.0f);
+        Direction = originalPosition;
+        isMoving = true;
+        startTime = Time.time;
+        
+        if (this.m_ToolType == ToolType.Dropper)
+        {
+            gameObject.transform.localScale = new Vector3(1.4f, 1f, 0.7f);
+            gameObject.transform.eulerAngles = new Vector3(0, 0, 0);
+        }
+    }
+    public IEnumerator WaitBoiling ()
+    {
+        yield return new WaitForSeconds(4.0f);
+        if (this.m_ToolType == ToolType.Beaker)
+        {
+            m_Content.SetActive(true);
+        }
+        else
+        {
+            GameObject.Find("Beaker").GetComponent<Tool>().m_Content.SetActive(true);
+        }
+    }
+    public void fn_Bunsen_Burner(LabState LS)
+    {
+
             m_Content.SetActive(true);
             LabManager.LM.m_LabState = LabState.Idle;
             LabManager.LM.fn_ResetCurrentSelectedTool();
@@ -178,22 +214,8 @@ public class Tool : MonoBehaviour {
             ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex++;
             LabManager.LM.m_ToolText.text = "ﺔﺤﻴﺤﺻ ﺓﻮﻄﺧ";
 
-            yield  return new WaitForSeconds (m_BunsenBurner_Timer);
+            
 
-            if (m_ChildTools != null)
-            {
-                m_ChildTools[0].GetComponent<Tool>().m_ToolTempreture = 10;
-            }
-            else
-            {
-                Debug.Log("Beaker not a child to bunsen burner"); 
-            }
-
-        //}
-        // else
-        //{
-        //  Debug.Log("Action Can't be applied to this tool"); // TODO Change to dynamic on screen arabic text
-        // }
     }
 
     public void fn_Dropper(LabState LS, Tool OtherTool)
@@ -205,20 +227,20 @@ public class Tool : MonoBehaviour {
                 if (OtherTool.m_ToolType == ToolType.Distilled_Water || OtherTool.m_ToolType == ToolType.Egg_Yolk || OtherTool.m_ToolType == ToolType.Glucose_Solution ||
                 OtherTool.m_ToolType == ToolType.Iodine_Solution || OtherTool.m_ToolType == ToolType.Starch_Solution || OtherTool.m_ToolType == ToolType.Benedict_Reagent)
                 {
-                    //GameObject newContent = Instantiate(OtherTool.m_Content, m_ContentPosition.position, transform.rotation, transform);
-                    //m_Content = newContent;
                     isFull = true;
+                    m_Content.SetActive(false);
+                    this.chimicalContent = OtherTool.chimicalContent;
                     LabManager.LM.m_LabState = LabState.Idle;
                     LabManager.LM.fn_ResetCurrentSelectedTool();
                 }
                 else
                 {
-                    Debug.Log("Can't Use dropper with this tool"); // TODO Change to dynamic on screen arabic text
+                    LabManager.LM.m_ToolText.text = "ﺓﺍﺩﻷﺍ ﻩﺬﻫ ﻊﻣ ﺓﺭﺎﻄﻘﻟﺍ ﻡﺍﺪﺨﺘﺳﺍ ﻚﻨﻜﻤﻳ ﻻ";
                 }
             }
             else
             {
-                Debug.Log("Dropper is full, empty it first"); // TODO Change to dynamic on screen arabic text
+                LabManager.LM.m_ToolText.text = "ﻻﻭﺍ ﺎﻬﻏﺍﺮﻓﺍ ﻚﻴﻠﻋ ﺔﺌﻠﺘﻤﻣ ﺓﺭﺎﻄﻘﻟﺍ";
             }
         }
 
@@ -231,57 +253,39 @@ public class Tool : MonoBehaviour {
                 {
                    // GameObject DropedContent = Instantiate(m_Content, OtherTool.m_ContentPosition.position, OtherTool.gameObject.transform.rotation, OtherTool.gameObject.transform);
                    // OtherTool.m_Content = DropedContent;
-
-                   /* switch (OtherTool.m_Content.tag)
+                    this.m_Content.SetActive(true);
+                    Chemistry Makeit = OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().SearchColorName("Detecting Sugar", this.chimicalContent, OtherTool.chimicalContent);
+                    if (Makeit.colorComponent != Vector3.zero)
                     {
-                        case "Glucose Solution":
-                            if (m_Content.tag == "Bendict Reagent")
-                            {
-                                // TODO CHANGE COLOR FROM BLUE TO ORANGE
-                            }
-                            break;
-
-                        case "Bread":
-                            if (m_Content.tag == "Iodine Solution")
-                            {
-                                // TODO CHANGE COLOR FROM ORANGE TO DARK BLUE
-                            }
-                            break;
-
-                        case "Wheat Seeds":
-                            if (m_Content.tag == "Iodine Solution")
-                            {
-                                // TODO CHANGE COLOR FROM ORANGE TO DARK BLUE
-                            }
-                            break;
-
-                        case "Peas Seeds":
-                            if (m_Content.tag == "Iodine Solution")
-                            {
-                                // TODO CHANGE COLOR FROM ORANGE TO LIGHT BLUE
-                            }
-                            break;
-
-                        default: Debug.Log("No specified behavior");
-                            break;
-                    }*/
-
+                        OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().GetVector(Makeit.colorComponent);
+                    }   
+                    
+                    if (OtherTool.chimicalContent == "")
+                        OtherTool.chimicalContent = this.chimicalContent;
+                    else
+                    {
+                        OtherTool.chimicalContent += "+" + this.chimicalContent;
+                        OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().StartCoroutine("Incremental");
+                    }
+                    
+                    
                     fn_ClearContent();
                     LabManager.LM.m_LabState = LabState.Idle;
                     LabManager.LM.fn_ResetCurrentSelectedTool();
                 }
                 else
                 {
-                    Debug.Log("Can't Empty Dropper in this tool"); // TODO Change to dynamic on screen arabic text
+                    LabManager.LM.m_ToolText.text = "ﺓﺍﺩﻷﺍ ﻩﺬﻫ ﻲﻓ ﺓﺭﺎﻄﻘﻟﺍ ﻯﻮﺘﺤﻣ ﻎﻳﺮﻔﺗ ﻚﻨﻜﻤﻳ ﻻ";
                 }
             }
             else
             {
-                Debug.Log("Dropper has no content"); // TODO Change to dynamic on screen arabic text
+                LabManager.LM.m_ToolText.text = "ﻪﻏﺭﺎﻓ ﺓﺭﺎﻄﻘﻟﺍ";
             }
         }
 
         fn_Interact(OtherTool, 90f, 0, 0);
+        StartCoroutine("ComeBack");
     }
 
     public void fn_Mortar_Pestle(LabState LS, Tool OtherTool)
@@ -297,7 +301,7 @@ public class Tool : MonoBehaviour {
             }
             else
             {
-                Debug.Log("Already Smashed!"); // TODO Change to dynamic arabic text
+                LabManager.LM.m_ToolText.text = "ﻞﻌﻔﻟﺎﺑ ﺎﻬﺘﻨﺤﻃ ﺪﻘﻟ";
             }
         }
 
@@ -316,12 +320,12 @@ public class Tool : MonoBehaviour {
                 }
                 else
                 {
-                    Debug.Log("Can't empty content in this tool"); //TODO Change to dynamic on screen arabic text
+                    LabManager.LM.m_ToolText.text = "ﻩﺍﺩﻷﺍ ﻚﻠﺗ ﻊﻣ ﺎﻬﻣﺍﺪﺨﺘﺳﺍ ﻚﻨﻜﻤﻳ ﻻ";
                 }
             }
             else
             {
-                Debug.Log("No content!"); // TODO Change to dynamic arabic text
+                LabManager.LM.m_ToolText.text = "ﺎﻬﻠﺧﺍﺪﺑ ﺪﻌﺑ ًﺎﺌﻴﺷ ﻊﻀﺗ ﻢﻟ";
             }
         }
     }
@@ -342,6 +346,17 @@ public class Tool : MonoBehaviour {
             gameObject.transform.position = Beaker.m_ContentPosition.position;
             Beaker.m_Content = gameObject;
             Beaker.isFull = true;
+
+            if (Beaker.chimicalContent == "Heat")
+            {
+                this.m_ToolTempreture = 100;
+            }
+            Chemistry Makeit = this.gameObject.GetComponentInChildren<ChangeWaterColor>().SearchColorName("Detecting Sugar", Beaker.chimicalContent, this.chimicalContent);
+            if (Makeit.colorComponent != Vector3.zero)
+            {
+                this.gameObject.GetComponentInChildren<ChangeWaterColor>().GetVector(Makeit.colorComponent);
+            }
+
         }
     }
 
@@ -361,13 +376,19 @@ public class Tool : MonoBehaviour {
 
     public void fn_Interact (Tool OtherTool)
     {
-        gameObject.transform.position = OtherTool.m_InteractEntryPoint.position;
+        //gameObject.transform.position = OtherTool.m_InteractEntryPoint.position;
+        Direction = OtherTool.m_InteractEntryPoint.position;
+        isMoving = true;
+        startTime = Time.time;
     }
 
     public void fn_Interact (Tool OtherTool, float XRotation, float YRotation, float ZRotation)
     {
-        gameObject.transform.position = OtherTool.m_InteractEntryPoint.position;
-        gameObject.transform.eulerAngles = new Vector3 (XRotation, YRotation, ZRotation);
+        //gameObject.transform.position = OtherTool.m_InteractEntryPoint.position;
+        gameObject.transform.eulerAngles = new Vector3(XRotation, YRotation, ZRotation);
+        Direction = OtherTool.m_InteractEntryPoint.position;
+        isMoving = true;
+        startTime = Time.time;
         gameObject.transform.localScale = new Vector3(1, 1, 1);
     }
 

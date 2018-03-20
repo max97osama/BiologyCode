@@ -190,6 +190,12 @@ public class UIElement : MonoBehaviour {
             {
                 LabManager.LM.isBeganPractice = true;
                 LabManager.LM.m_ToolText.text = "ﺔﺑﺮﺠﺘﻟﺍ ﻲﻓ ﺀﺪﺒﻟﺍ ﻚﻨﻜﻤﻳ ﻥﻷﺍ !ﺖﻨﺴﺣﺃ";
+
+                Tool[] LabTools = GameObject.FindObjectsOfType<Tool>();
+                foreach (Tool item in LabTools)
+                {
+                    item.originalPosition = item.gameObject.transform.position;
+                }
             }
             else
             {
@@ -252,7 +258,8 @@ public class UIElement : MonoBehaviour {
                             if (ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].
                                 m_Missions[ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex].m_CurrentNeededTool == ToolType.Bunsen_Burner)
                         {
-                            StartCoroutine(LabManager.LM.m_CurrentSelectedTool.GetComponent<Tool>().fn_Bunsen_Burner(LabManager.LM.m_LabState));
+                            StartCoroutine(LabManager.LM.m_CurrentSelectedTool.GetComponentInChildren<Tool>().WaitBoiling());
+                            LabManager.LM.m_CurrentSelectedTool.GetComponent<Tool>().fn_Bunsen_Burner(LabManager.LM.m_LabState);
                         }
                         else
                         {
