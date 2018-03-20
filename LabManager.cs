@@ -389,6 +389,8 @@ public class LabManager : MonoBehaviour
                         plusCounter++;
                     }
                 }
+                if (plusCounter == 1)
+                    //plusCounter = 2;
                 for (int i = 0; i < plusCounter; i++)
                 {
 
@@ -396,10 +398,8 @@ public class LabManager : MonoBehaviour
                     {
                         if (tempContent.StartsWith(element.m_ToolType.ToString()))
                         {
-                            if (textSender == "")
-                                textSender += element.m_ToolName;
-                            else
-                                textSender += "   +   " + element.m_ToolName;
+
+                            textSender += element.m_ToolName + " + ";
                             int removed = element.m_ToolType.ToString().Length + 1;
                             //tempContent.Replace(removed, "");
                             int total = tempContent.Length - removed;
@@ -417,7 +417,7 @@ public class LabManager : MonoBehaviour
             }
             foreach (Tool item in LabTools)
             {
-                if (item.m_ToolType.ToString() == thisTool.chimicalContent)
+                if (item.m_ToolType.ToString() == tempContent)
                 {
                     textSender += item.m_ToolName;
                     return textSender;
