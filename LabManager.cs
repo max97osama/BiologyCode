@@ -458,10 +458,12 @@ public class LabManager : MonoBehaviour
 
     public void fn_UpdateMissionText(int index)
     {
-        Color newColor = new Color(0, 255, 0);
-        m_MissionsText[index].color = newColor;
+        m_MissionsText[index].color = Color.green;
     }
-
+    public void fn_UndoMissionColor (int index)
+    {
+        m_MissionsText[index].color = Color.red;
+    }
     public GameObject fn_GetInfoPanel()
     {
         return infoPanel;
