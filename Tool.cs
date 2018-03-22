@@ -182,7 +182,7 @@ public class Tool : MonoBehaviour {
         if (this.m_ToolType == ToolType.TestingTube)
         {
 
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(4.0f);
             GameObject.Find("Beaker").gameObject.GetComponent<Tool>().isFull = false;
         }
         Direction = originalPosition;
