@@ -5,8 +5,6 @@ using UnityEngine;
 public class Tool : MonoBehaviour {
 
     //private:
-    [HideInInspector]
-    public Vector3 originalPosition;
     private bool isMoving;
     private float startTime;
     private Vector3 Direction;
@@ -21,13 +19,13 @@ public class Tool : MonoBehaviour {
     public Transform m_InteractEntryPoint;
 
     public GameObject[] m_ChildTools;
-    public float m_BunsenBurner_Timer = 4;
 
     [HideInInspector]
     public bool isPrepared = false;
     [HideInInspector]
     public float m_ToolTempreture = 0;
-
+    [HideInInspector]
+    public Vector3 originalPosition;
     private void Start()
     {
         originalPosition = gameObject.transform.position;
@@ -207,6 +205,35 @@ public class Tool : MonoBehaviour {
             GameObject.Find("Beaker").GetComponent<Tool>().m_Content.SetActive(true);
         }
     }
+    
+    private bool fn_InOrder (Tool OtherTool)
+    {
+        char order = OtherTool.gameObject.name[OtherTool.gameObject.name.Length - 1];
+        OtherTool.gameObject.name = OtherTool.gameObject.name[OtherTool.gameObject.name.Length - 1] + "";
+
+        if ( (int)char.GetNumericValue(order) > 0 && (int)char.GetNumericValue(order) < 6)
+        {
+            this.gameObject.name = OtherTool.gameObject.GetComponent<Tool>().m_ChildTools.Length.ToString();
+            for (int i = 0; i < order; i++)
+            {
+                if (OtherTool.gameObject.GetComponent<Tool>().m_ChildTools[i].gameObject.GetComponent<Tool>().isFull == false)
+                {
+                    return false;
+                }
+                else
+                {
+                    OtherTool.gameObject.GetComponent<Tool>().m_ChildTools[i].gameObject.GetComponent<Tool>().name = i.ToString();
+                }
+                return true;
+            }
+            return true;
+        }
+        else
+        {
+            return true;
+        }
+        
+    }
     public void fn_Bunsen_Burner(LabState LS)
     {
 
@@ -259,7 +286,8 @@ public class Tool : MonoBehaviour {
                 if (OtherTool.m_ToolType == ToolType.Container_Sample || OtherTool.m_ToolType == ToolType.MircoScope_GlassSection || OtherTool.m_ToolType == ToolType.Mortar_Pestle
                     || OtherTool.m_ToolType == ToolType.TestingTube)
                 {
-                    if (!(OtherTool.chimicalContent == "" && this.chimicalContent.EndsWith("Reagent")) && !(this.chimicalContent.EndsWith("Reagent") && OtherTool.chimicalContent.Contains(this.chimicalContent)) && !(this.chimicalContent.Contains("Solution") && OtherTool.chimicalContent != ""))
+                    if (!(OtherTool.chimicalContent == "" && this.chimicalContent.EndsWith("Reagent")) && !(this.chimicalContent.EndsWith("Reagent") && OtherTool.chimicalContent.Contains(this.chimicalContent)) 
+                        && !(this.chimicalContent.Contains("Solution") && OtherTool.chimicalContent != ""))
                     {
                         this.m_Content.SetActive(true);
                         Chemistry Makeit = OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().SearchColorName("Detecting Sugar", this.chimicalContent, OtherTool.chimicalContent);
@@ -276,7 +304,7 @@ public class Tool : MonoBehaviour {
                             OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().StartCoroutine("Incremental");
                         }
 
-
+                        OtherTool.isFull = true;
                         fn_ClearContent();
                         LabManager.LM.m_LabState = LabState.Idle;
                         LabManager.LM.fn_ResetCurrentSelectedTool();

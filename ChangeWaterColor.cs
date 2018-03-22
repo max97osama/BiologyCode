@@ -190,15 +190,13 @@ public class ChangeWaterColor : MonoBehaviour {
     
     void setUpColors()
     {
-        // 1-first(comming) , 2-second(current123)
-        // "~" any thing in side simpole
+        // 1-first(comming) , 2-second(currentx+y+z)
         // if not found return the same color as you have setColor
-        Detecting_Sugar[0] = new Chemistry("Glucose_Solution", "", new Vector3(1f,0.92f,0.196f));
+        Detecting_Sugar[0] = new Chemistry("Glucose_Solution", "", new Color(0.843f,0.784f,0.0588f,0.588f));
         Detecting_Sugar[1] = new Chemistry("Starch_Solution", "", new Vector3(0.47f,0.588f,0.588f));
-        Detecting_Sugar[2] = new Chemistry("Egg_Yolk", "", new Color(0.843f,0.784f,0.0588f,0.588f));
+        Detecting_Sugar[2] = new Chemistry("Egg_Yolk", "", new Vector3(1f, 0.92f, 0.196f));
         Detecting_Sugar[3] = new Chemistry("Distilled_Water", "", new Vector3(0.294f,0.7255f,0.86f));
         Detecting_Sugar[4] = new Chemistry("Benedict_Reagent", "", new Vector3(0, 0.4f, 1));
-        //Detecting_Sugar[5] = new Chemistry("Benedict_Reagent", "Glucose_Solution", new Vector3(0, 0.4f, 1));
         Detecting_Sugar[5] = new Chemistry("Heat", "Glucose_Solution+Benedict_Reagent", new Vector3(1f, 0.4f, 0f));
         
         //-------------------------------------------------------------------------------------------
