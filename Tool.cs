@@ -5,8 +5,8 @@ using UnityEngine;
 public class Tool : MonoBehaviour {
 
     //private:
+    [HideInInspector]
     public Vector3 originalPosition;
-    private Vector3 originalTestingTubePosition;
     private bool isMoving;
     private float startTime;
     private Vector3 Direction;
@@ -35,7 +35,7 @@ public class Tool : MonoBehaviour {
 
     void Update ()
     {
-        //slerp goes here
+        
         if (isMoving)
         {
             float fracComplete = (Time.time - startTime) / 2.0f;
@@ -76,63 +76,63 @@ public class Tool : MonoBehaviour {
             }
             else
             {
-                Mission thisMission = ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].
-                    m_Missions[ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex];
-                Tool currentSelectedTool = LabManager.LM.m_CurrentSelectedTool.GetComponent<Tool>();
-                if (currentSelectedTool.m_ToolType == thisMission.m_CurrentNeededTool
-                    && m_ToolType == thisMission.m_NextNeededTool 
-                    && LabManager.LM.m_LabState == thisMission.m_ExpectedAction)
+                if (ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex < ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].m_Missions.Length)
                 {
-                    thisMission.isDone = true;
-                    LabManager.LM.fn_UpdateMissionText(ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex + 1);
-                    if (ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].m_Missions.Length > ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex)
+
+                    Mission thisMission = ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].
+                        m_Missions[ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex];
+                    Tool currentSelectedTool = LabManager.LM.m_CurrentSelectedTool.GetComponent<Tool>();
+                    if (currentSelectedTool.m_ToolType == thisMission.m_CurrentNeededTool
+                        && m_ToolType == thisMission.m_NextNeededTool
+                        && LabManager.LM.m_LabState == thisMission.m_ExpectedAction)
                     {
+                        thisMission.isDone = true;
+                        LabManager.LM.fn_UpdateMissionText(ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex + 1);
                         ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex++;
                         LabManager.LM.m_ToolText.text = "ﺔﺤﻴﺤﺻ ﺓﻮﻄﺧ";
+
+                        switch (currentSelectedTool.m_ToolType)
+                        {
+                            case ToolType.Dropper: currentSelectedTool.fn_Dropper(LabManager.LM.m_LabState, this);
+                                break;
+                            case ToolType.MircoScope_GlassSection:
+                                break;
+                            case ToolType.MircoScope:
+                                break;
+                            case ToolType.Mortar_Pestle: currentSelectedTool.fn_Mortar_Pestle(LabManager.LM.m_LabState, this);
+                                break;
+                            case ToolType.Scalple:
+                                break;
+                            case ToolType.TestingTube: currentSelectedTool.fn_TestingTube(LabManager.LM.m_LabState, this);
+                                break;
+                            case ToolType.Thermometer:
+                                break;
+                            case ToolType.Tongs:
+                                break;
+                            case ToolType.Peas_Seeds_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
+                                break;
+                            case ToolType.Tomatoes_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
+                                break;
+                            case ToolType.Wheat_Seeds_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
+                                break;
+                            case ToolType.Bread_Pieces_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
+                                break;
+                            default: Debug.Log("Tool not found");
+                                break;
+                        }
                     }
                     else
                     {
-                        LabManager.LM.m_ToolText.text = "ﺡﺎﺠﻨﺑ ﺔﺑﺮﺠﺘﻟﺍ ﺖﻤﻤﺗﺍ ﺪﻘﻟ";
-                        GameObject.Find("Bunsen Burner").GetComponent<Tool>().m_Content.SetActive(false);
-                        GameObject.Find("Beaker").GetComponent<Tool>().m_Content.SetActive(false);
-                    }
-                    
-                    
-                    switch (currentSelectedTool.m_ToolType)
-                    {
-                        case ToolType.Dropper: currentSelectedTool.fn_Dropper(LabManager.LM.m_LabState, this);
-                            break;
-                        case ToolType.MircoScope_GlassSection:
-                            break;
-                        case ToolType.MircoScope:
-                            break;
-                        case ToolType.Mortar_Pestle: currentSelectedTool.fn_Mortar_Pestle(LabManager.LM.m_LabState, this);
-                            break;
-                        case ToolType.Scalple:
-                            break;
-                        case ToolType.TestingTube: currentSelectedTool.fn_TestingTube(LabManager.LM.m_LabState, this);
-                            break;
-                        case ToolType.Thermometer:
-                            break;
-                        case ToolType.Tongs:
-                            break;
-                        case ToolType.Peas_Seeds_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
-                            break;
-                        case ToolType.Tomatoes_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
-                            break;
-                        case ToolType.Wheat_Seeds_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
-                            break;
-                        case ToolType.Bread_Pieces_Container: currentSelectedTool.fn_Container(LabManager.LM.m_LabState, this);
-                            break;
-                        default: Debug.Log("Tool not found");
-                            break;
+                        //LabManager.LM.m_ToolText.text = "ﺔﺌﻃﺎﺧ ﺓﻮﻄﺧ";
+                        LabManager.LM.m_CurrentSelectedTool = null;
+                        LabManager.LM.m_LabState = LabState.Idle;
                     }
                 }
                 else
                 {
-                    LabManager.LM.m_ToolText.text = "ﺔﺌﻃﺎﺧ ﺓﻮﻄﺧ";
-                    LabManager.LM.m_CurrentSelectedTool = null;
-                    LabManager.LM.m_LabState = LabState.Idle;
+                    LabManager.LM.m_ToolText.text = "ﺡﺎﺠﻨﺑ ﺔﺑﺮﺠﺘﻟﺍ ﺖﻤﻤﺗﺍ ﺪﻘﻟ";
+                    GameObject.Find("Bunsen Burner").GetComponent<Tool>().m_Content.SetActive(false);
+                    GameObject.Find("Beaker").GetComponent<Tool>().m_Content.SetActive(false);
                 }
             }
         }
@@ -178,7 +178,13 @@ public class Tool : MonoBehaviour {
 
     public IEnumerator ComeBack ()
     {
-        yield return new WaitForSeconds(6.0f);
+        yield return new WaitForSeconds(2.0f);
+        if (this.m_ToolType == ToolType.TestingTube)
+        {
+
+            yield return new WaitForSeconds(4.0f);
+            GameObject.Find("Beaker").gameObject.GetComponent<Tool>().isFull = false;
+        }
         Direction = originalPosition;
         isMoving = true;
         startTime = Time.time;
@@ -232,6 +238,8 @@ public class Tool : MonoBehaviour {
                     this.chimicalContent = OtherTool.chimicalContent;
                     LabManager.LM.m_LabState = LabState.Idle;
                     LabManager.LM.fn_ResetCurrentSelectedTool();
+                    fn_Interact(OtherTool, 90f, 0, 0);
+                    //StartCoroutine("ComeBack");
                 }
                 else
                 {
@@ -251,27 +259,40 @@ public class Tool : MonoBehaviour {
                 if (OtherTool.m_ToolType == ToolType.Container_Sample || OtherTool.m_ToolType == ToolType.MircoScope_GlassSection || OtherTool.m_ToolType == ToolType.Mortar_Pestle
                     || OtherTool.m_ToolType == ToolType.TestingTube)
                 {
-                   // GameObject DropedContent = Instantiate(m_Content, OtherTool.m_ContentPosition.position, OtherTool.gameObject.transform.rotation, OtherTool.gameObject.transform);
-                   // OtherTool.m_Content = DropedContent;
-                    this.m_Content.SetActive(true);
-                    Chemistry Makeit = OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().SearchColorName("Detecting Sugar", this.chimicalContent, OtherTool.chimicalContent);
-                    if (Makeit.colorComponent != Vector3.zero)
+                    if (!(OtherTool.chimicalContent == "" && this.chimicalContent.EndsWith("Reagent")) && !(this.chimicalContent.EndsWith("Reagent") && OtherTool.chimicalContent.Contains(this.chimicalContent)) && !(this.chimicalContent.Contains("Solution") && OtherTool.chimicalContent != ""))
                     {
-                        OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().GetVector(Makeit.colorComponent);
-                    }   
-                    
-                    if (OtherTool.chimicalContent == "")
-                        OtherTool.chimicalContent = this.chimicalContent;
+                        this.m_Content.SetActive(true);
+                        Chemistry Makeit = OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().SearchColorName("Detecting Sugar", this.chimicalContent, OtherTool.chimicalContent);
+                        if (Makeit.colorComponent != Vector3.zero)
+                        {
+                            OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().GetVector(Makeit.colorComponent);
+                        }
+
+                        if (OtherTool.chimicalContent == "")
+                            OtherTool.chimicalContent = this.chimicalContent;
+                        else
+                        {
+                            OtherTool.chimicalContent += "+" + this.chimicalContent;
+                            OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().StartCoroutine("Incremental");
+                        }
+
+
+                        fn_ClearContent();
+                        LabManager.LM.m_LabState = LabState.Idle;
+                        LabManager.LM.fn_ResetCurrentSelectedTool();
+
+                        fn_Interact(OtherTool, 90f, 0, 0);
+                        StartCoroutine("ComeBack");
+                    }
                     else
                     {
-                        OtherTool.chimicalContent += "+" + this.chimicalContent;
-                        OtherTool.gameObject.GetComponentInChildren<ChangeWaterColor>().StartCoroutine("Incremental");
+                        LabManager.LM.m_ToolText.text = "ﺓﺍﺩﻷﺍ ﻩﺬﻫ ﻲﻓ ﺓﺭﺎﻄﻘﻟﺍ ﻯﻮﺘﺤﻣ ﻎﻳﺮﻔﺗ ﻚﻨﻜﻤﻳ ﻻ";
+                        LabManager.LM.fn_UndoMissionColor(ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex);
+                        ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex--;
+
+
                     }
                     
-                    
-                    fn_ClearContent();
-                    LabManager.LM.m_LabState = LabState.Idle;
-                    LabManager.LM.fn_ResetCurrentSelectedTool();
                 }
                 else
                 {
@@ -284,8 +305,7 @@ public class Tool : MonoBehaviour {
             }
         }
 
-        fn_Interact(OtherTool, 90f, 0, 0);
-        StartCoroutine("ComeBack");
+        
     }
 
     public void fn_Mortar_Pestle(LabState LS, Tool OtherTool)
@@ -312,8 +332,8 @@ public class Tool : MonoBehaviour {
                 if (OtherTool.m_ToolType == ToolType.Container_Sample)
                 {
                     //GameObject DropedContent = Instantiate(m_Content, OtherTool.m_ContentPosition.position, OtherTool.gameObject.transform.rotation, OtherTool.gameObject.transform);
-                    //OtherTool.m_Content = DropedContent;
                     //GameObject.Destroy(m_Content.gameObject);
+                    OtherTool.chimicalContent += this.chimicalContent;
                     isFull = false;
                     LabManager.LM.m_LabState = LabState.Idle;
                     LabManager.LM.fn_ResetCurrentSelectedTool();
@@ -332,31 +352,39 @@ public class Tool : MonoBehaviour {
 
     public void fn_TestingTube(LabState LS, Tool Beaker)
     {
-        if (Beaker.m_ToolType == ToolType.Beaker)
+        if (Beaker.m_ToolType == ToolType.Beaker && Beaker.isFull == false)
         {
-            if (Beaker.isFull == true && Beaker.fn_GetBeakerContentPrePosition() != new Vector3 (0,0,0) )
+            if (this.m_ToolTempreture < 100)
             {
-                gameObject.transform.position = Beaker.fn_GetBeakerContentPrePosition();
+                Beaker.isFull = true;
+                isMoving = true;
+                Direction = Beaker.m_ContentPosition.position;
+                startTime = Time.time;
+                StartCoroutine("ComeBack");
+                if (Beaker.chimicalContent == "Heat")
+                {
+                    this.m_ToolTempreture = 100;
+                }
+                Chemistry Makeit = this.gameObject.GetComponentInChildren<ChangeWaterColor>().SearchColorName("Detecting Sugar", Beaker.chimicalContent, this.chimicalContent);
+                if (Makeit.colorComponent != Vector3.zero)
+                {
+                    this.gameObject.GetComponentInChildren<ChangeWaterColor>().GetVector(Makeit.colorComponent);
+                }
             }
             else
             {
-                Debug.Log("Something went wrong!");
-            }
-            Beaker.originalTestingTubePosition = transform.position;
-            gameObject.transform.position = Beaker.m_ContentPosition.position;
-            Beaker.m_Content = gameObject;
-            Beaker.isFull = true;
-
-            if (Beaker.chimicalContent == "Heat")
-            {
-                this.m_ToolTempreture = 100;
-            }
-            Chemistry Makeit = this.gameObject.GetComponentInChildren<ChangeWaterColor>().SearchColorName("Detecting Sugar", Beaker.chimicalContent, this.chimicalContent);
-            if (Makeit.colorComponent != Vector3.zero)
-            {
-                this.gameObject.GetComponentInChildren<ChangeWaterColor>().GetVector(Makeit.colorComponent);
+                LabManager.LM.m_ToolText.text = "ﻞﻌﻔﻟﺎﺑ ﺎﻬﺘﻨﺨﺳ ﺪﻘﻟ";
+                LabManager.LM.fn_UndoMissionColor(ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex);
+                ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex--;
             }
 
+        }
+        else
+        {
+            LabManager.LM.m_ToolText.text = "ﻥﻻﺍ ﻯﺮﺧﺍ ﺔﺑﻮﺒﻧﺍ ﻊﺿﻭ ﻚﻨﻜﻤﻳ ﻻ";
+            LabManager.LM.fn_UndoMissionColor(ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex);
+            ApplicationManager.AM.m_Scenes[ApplicationManager.AM.m_CurrentScenesIndex].LastMissionIndex--;
+            
         }
     }
 
@@ -368,6 +396,7 @@ public class Tool : MonoBehaviour {
             {
                // GameObject DropedContent = Instantiate(m_Content, OtherTool.m_ContentPosition.position, OtherTool.gameObject.transform.rotation, OtherTool.gameObject.transform);
                 //OtherTool.m_Content = DropedContent;
+                OtherTool.chimicalContent += this.chimicalContent;
                 LabManager.LM.m_LabState = LabState.Idle;
                 LabManager.LM.fn_ResetCurrentSelectedTool();
             }
@@ -376,7 +405,6 @@ public class Tool : MonoBehaviour {
 
     public void fn_Interact (Tool OtherTool)
     {
-        //gameObject.transform.position = OtherTool.m_InteractEntryPoint.position;
         Direction = OtherTool.m_InteractEntryPoint.position;
         isMoving = true;
         startTime = Time.time;
@@ -392,16 +420,5 @@ public class Tool : MonoBehaviour {
         gameObject.transform.localScale = new Vector3(1, 1, 1);
     }
 
-    public Vector3 fn_GetBeakerContentPrePosition()
-    {
-        if (originalTestingTubePosition != null)
-        {
-            return originalTestingTubePosition;
-        }
-        else
-        {
-            return new Vector3(0, 0, 0);
-        }
-        
-    }
+   
 }
