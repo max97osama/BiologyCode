@@ -121,7 +121,7 @@ public class Tool : MonoBehaviour {
                     }
                     else
                     {
-                        //LabManager.LM.m_ToolText.text = "ﺔﺌﻃﺎﺧ ﺓﻮﻄﺧ";
+                        LabManager.LM.m_ToolText.text = "ﺕﺍﻮﻄﺨﻠﻟ ﺢﻴﺤﺼﻟﺍ ﺐﻴﺗﺮﺘﻟﺍ ﻊﺒﺗﺃ";
                         LabManager.LM.m_CurrentSelectedTool = null;
                         LabManager.LM.m_LabState = LabState.Idle;
                     }
